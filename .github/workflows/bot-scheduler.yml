@@ -1,4 +1,4 @@
-name: Bluesky Hashtag Bot Scheduler
+name: Bluesky Show Bot Scheduler
 
 on:
   schedule:
@@ -12,26 +12,25 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Trigger Netlify Function
-      run: |
-        echo "🤖 Triggering Bluesky Hashtag Bot via Netlify Function..."
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
         
-        response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
-          -X POST \
-          "${{ secrets.NETLIFY_BOT_URL }}" \
-          -H "Content-Type: application/json")
-        
-        http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-        body=$(echo $response | sed -e 's/HTTPSTATUS.*//g')
-        
-        echo "HTTP Status: $http_code"
-        echo "Response: $body"
-        
-        if [ $http_code -ne 200 ]; then
-          echo "❌ Bot execution failed with status $http_code"
-          echo "$body"
-          exit 1
-        else
-          echo "✅ Bot executed successfully"
-          echo "$body" | jq '.' 2>/dev/null || echo "$body"
-        fi
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Build TypeScript
+      run: npm run build
+      
+    - name: Run Bluesky Show Bot
+      env:
+        BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+        BLUESKY_PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
+        HASHTAGS: "#blueskyshow"
+        REPLY_INTERVAL_MINUTES: "30"
+      run: node dist/index.js
