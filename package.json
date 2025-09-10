@@ -1,0 +1,26 @@
+{
+  "name": "bluesky-hashtag-bot",
+  "version": "1.0.0",
+  "description": "A Bluesky bot that monitors hashtags and responds with automated replies for blueskyshow.com",
+  "main": "dist/bot.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/bot.ts",
+    "start": "node dist/bot.js",
+    "dev:netlify": "netlify dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["bluesky", "bot", "hashtag", "automation", "social-media"],
+  "author": "Todd Lambert",
+  "license": "MIT",
+  "dependencies": {
+    "@atproto/api": "^0.12.29",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3",
+    "@netlify/functions": "^2.8.1"
+  }
+}

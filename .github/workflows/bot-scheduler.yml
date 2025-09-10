@@ -1,0 +1,37 @@
+name: Bluesky Hashtag Bot Scheduler
+
+on:
+  schedule:
+    # Run every 2 minutes
+    - cron: '*/2 * * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Trigger Netlify Function
+      run: |
+        echo "🤖 Triggering Bluesky Hashtag Bot via Netlify Function..."
+        
+        response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
+          -X POST \
+          "${{ secrets.NETLIFY_BOT_URL }}" \
+          -H "Content-Type: application/json")
+        
+        http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+        body=$(echo $response | sed -e 's/HTTPSTATUS.*//g')
+        
+        echo "HTTP Status: $http_code"
+        echo "Response: $body"
+        
+        if [ $http_code -ne 200 ]; then
+          echo "❌ Bot execution failed with status $http_code"
+          echo "$body"
+          exit 1
+        else
+          echo "✅ Bot executed successfully"
+          echo "$body" | jq '.' 2>/dev/null || echo "$body"
+        fi
