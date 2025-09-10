@@ -1,11 +1,13 @@
 import { Handler } from '@netlify/functions';
-import { BlueskyHashtagBot } from '../src/bot';
-import { BotConfig } from '../src/types';
 
 const handler: Handler = async (event, context) => {
   console.log('🚀 Netlify function started');
   
   try {
+    // Dynamic import to avoid bundling issues
+    const { BlueskyHashtagBot } = await import('../../dist/bot.js');
+    const { BotConfig } = await import('../../dist/types.js');
+    
     // Get environment variables
     const handle = process.env.BLUESKY_HANDLE;
     const password = process.env.BLUESKY_PASSWORD;
@@ -17,7 +19,7 @@ const handler: Handler = async (event, context) => {
 
     const hashtags = hashtagsEnv.split(',').map((tag: string) => tag.trim());
     
-    const config: BotConfig = {
+    const config = {
       handle,
       password,
       hashtags,
