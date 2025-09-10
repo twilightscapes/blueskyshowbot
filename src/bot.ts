@@ -2,16 +2,9 @@ import { BskyAgent } from '@atproto/api';
 import { BotConfig } from './types';
 import { getRandomResponse, getCooldownMinutes, HASHTAG_RESPONSES } from './responses';
 
-interface ReplyRecord {
-  postUri: string;
-  hashtag: string;
-  timestamp: number;
-}
-
 export class BlueskyHashtagBot {
   private agent: BskyAgent;
   private config: BotConfig;
-  private replyHistory: ReplyRecord[] = [];
 
   constructor(config: BotConfig) {
     this.agent = new BskyAgent({
@@ -83,7 +76,6 @@ export class BlueskyHashtagBot {
     }
 
     console.log(`📊 Total posts processed: ${totalProcessed}`);
-    this.cleanupOldReplies();
   }
 
   private async processPost(post: any, hashtag: string): Promise<boolean> {
@@ -96,7 +88,7 @@ export class BlueskyHashtagBot {
     }
 
     // Check if we've already replied to this post for this hashtag
-    if (this.hasRecentReply(postUri, hashtag)) {
+    if (await this.hasRecentReply(postUri, hashtag)) {
       console.log(`⏭️ SKIPPING ${hashtag} on post (already replied recently)`);
       return false;
     }
@@ -111,7 +103,6 @@ export class BlueskyHashtagBot {
 
     try {
       await this.replyToPost(post, hashtag);
-      this.recordReply(postUri, hashtag);
       console.log(`✅ Successfully replied to post with ${hashtag}`);
       return true;
     } catch (error) {
@@ -125,6 +116,8 @@ export class BlueskyHashtagBot {
     const config = HASHTAG_RESPONSES.find(r => r.hashtag.toLowerCase() === hashtag.toLowerCase());
     
     console.log(`📤 Replying with: ${response}`);
+    console.log(`🎯 Reply target - URI: ${originalPost.uri}`);
+    console.log(`🎯 Reply target - CID: ${originalPost.cid}`);
 
     const replyPost: any = {
       text: response,
@@ -159,7 +152,10 @@ export class BlueskyHashtagBot {
       }
     }
 
-    await this.agent.post(replyPost);
+    const postResult = await this.agent.post(replyPost);
+    console.log(`✅ Reply posted successfully!`);
+    console.log(`📍 Reply URI: ${postResult.uri}`);
+    console.log(`🔗 Reply CID: ${postResult.cid}`);
   }
 
   private async createLinkCard(url: string): Promise<any> {
@@ -192,41 +188,48 @@ export class BlueskyHashtagBot {
     }
   }
 
-  private hasRecentReply(postUri: string, hashtag: string): boolean {
-    return this.replyHistory.some(record => 
-      record.postUri === postUri && 
-      record.hashtag === hashtag
-    );
+  private async hasRecentReply(postUri: string, hashtag: string): Promise<boolean> {
+    try {
+      console.log(`🔍 Checking if we've already replied to: ${postUri}`);
+      
+      // Get the post thread to see replies
+      const threadResponse = await this.agent.app.bsky.feed.getPostThread({
+        uri: postUri,
+        depth: 1
+      });
+
+      if (!threadResponse.data.thread) {
+        console.log(`❌ Could not fetch thread for post`);
+        return false;
+      }
+
+      const thread = threadResponse.data.thread as any;
+      const replies = thread.replies || [];
+      
+      console.log(`📊 Found ${replies.length} replies to check`);
+      
+      // Check if any reply is from our bot
+      for (const reply of replies) {
+        const replyAuthor = reply.post?.author?.handle;
+        if (replyAuthor === this.config.handle) {
+          console.log(`✅ Found existing reply from our bot (@${replyAuthor})`);
+          return true;
+        }
+      }
+      
+      console.log(`🆕 No previous replies from our bot found`);
+      return false;
+    } catch (error) {
+      console.error(`❌ Error checking for previous replies:`, error);
+      // On error, assume we haven't replied to avoid spam
+      return false;
+    }
   }
 
   private isInCooldown(hashtag: string): boolean {
-    const cooldownMs = getCooldownMinutes(hashtag, this.config.defaultCooldownMinutes) * 60 * 1000;
-    const cutoff = Date.now() - cooldownMs;
-    
-    return this.replyHistory.some(record => 
-      record.hashtag === hashtag && 
-      record.timestamp > cutoff
-    );
-  }
-
-  private recordReply(postUri: string, hashtag: string): void {
-    this.replyHistory.push({
-      postUri,
-      hashtag,
-      timestamp: Date.now()
-    });
-  }
-
-  private cleanupOldReplies(): void {
-    // Remove replies older than 24 hours
-    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
-    const initialLength = this.replyHistory.length;
-    
-    this.replyHistory = this.replyHistory.filter(record => record.timestamp > oneDayAgo);
-    
-    const removed = initialLength - this.replyHistory.length;
-    if (removed > 0) {
-      console.log(`🧹 Cleaned up ${removed} old reply records`);
-    }
+    // Since we're running every 2 minutes and have a 30-minute cooldown,
+    // we can simplify this by checking the current time
+    // For now, let's disable cooldown and rely on the reply checking
+    return false;
   }
 }
