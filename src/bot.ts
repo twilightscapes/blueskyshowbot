@@ -226,32 +226,94 @@ export class BlueskyHashtagBot {
 
   private async createLinkCard(url: string): Promise<any> {
     try {
+      console.log(`🔗 Creating link card for: ${url}`);
+      
       // Fetch the webpage to get title and description
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; BlueSkyBot/1.0)'
+        }
+      });
       const html = await response.text();
       
-      // Basic HTML parsing for title and description
-      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-      const descriptionMatch = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i) ||
-                               html.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i);
+      // Enhanced HTML parsing for better Open Graph support
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i) ||
+                         html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
+      const descriptionMatch = html.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i) ||
+                               html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i);
+      const imageMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
       
-      const title = titleMatch ? titleMatch[1].trim() : 'BlueSky Show';
-      const description = descriptionMatch ? descriptionMatch[1].trim() : 'Join us for live discussions every Friday at 3:30 PM Central!';
+      let title = titleMatch ? titleMatch[1].trim() : 'The Bluesky Show';
+      let description = descriptionMatch ? descriptionMatch[1].trim() : 'Join us for live discussions every Friday at 3:30 PM Central!';
       
-      return {
+      // Decode HTML entities
+      title = this.decodeHtmlEntities(title);
+      description = this.decodeHtmlEntities(description);
+      
+      const linkCard: any = {
         uri: url,
         title: title.substring(0, 300), // Bluesky limits
         description: description.substring(0, 1000)
       };
+      
+      // Add thumbnail if found
+      if (imageMatch && imageMatch[1]) {
+        const imageUrl = imageMatch[1].trim();
+        console.log(`🖼️ Found thumbnail: ${imageUrl}`);
+        
+        try {
+          // Fetch and upload the image to Bluesky
+          const imageResponse = await fetch(imageUrl);
+          if (imageResponse.ok) {
+            const imageBuffer = await imageResponse.arrayBuffer();
+            const imageBlob = new Uint8Array(imageBuffer);
+            
+            // Upload image to Bluesky
+            const uploadResponse = await this.agent.uploadBlob(imageBlob, {
+              encoding: 'image/jpeg' // or detect from response headers
+            });
+            
+            if (uploadResponse.success) {
+              linkCard.thumb = uploadResponse.data.blob;
+              console.log(`✅ Thumbnail uploaded successfully`);
+            }
+          }
+        } catch (imageError) {
+          console.log(`⚠️ Could not process thumbnail: ${imageError instanceof Error ? imageError.message : 'Unknown error'}`);
+        }
+      }
+      
+      console.log(`📝 Link card created - Title: "${title}", Description: "${description}"`);
+      
+      return linkCard;
     } catch (error) {
-      console.error('Error creating link card:', error);
+      console.error('❌ Error creating link card:', error);
       // Return basic link card as fallback
       return {
         uri: url,
-        title: 'BlueSky Show',
+        title: 'The Bluesky Show',
         description: 'Join us for live discussions every Friday at 3:30 PM Central!'
       };
     }
+  }
+
+  private decodeHtmlEntities(text: string): string {
+    const entities: Record<string, string> = {
+      '&amp;': '&',
+      '&lt;': '<',
+      '&gt;': '>',
+      '&quot;': '"',
+      '&#39;': "'",
+      '&apos;': "'",
+      '&#x27;': "'",
+      '&#x2F;': '/',
+      '&#x60;': '`',
+      '&#x3D;': '='
+    };
+    
+    return text.replace(/&[a-zA-Z0-9#]+;/g, (entity) => {
+      return entities[entity] || entity;
+    });
   }
 
   private async hasRecentReply(postUri: string, hashtag: string): Promise<boolean> {
