@@ -68,7 +68,21 @@ export class BlueskyHashtagBot {
 
         console.log(`Found ${searchResults.data.posts.length} posts for ${hashtag}`);
 
-        for (const post of searchResults.data.posts) {
+        // Filter posts to only include those from the last X hours (configurable, default 24 hours)
+        const maxAgeHours = this.config.maxPostAgeHours || 24;
+        const cutoffTime = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000);
+        const recentPosts = searchResults.data.posts.filter(post => {
+          const postDate = new Date(post.indexedAt);
+          const isRecent = postDate > cutoffTime;
+          if (!isRecent) {
+            console.log(`⏰ Skipping old post from ${postDate.toISOString()} (older than ${maxAgeHours} hours)`);
+          }
+          return isRecent;
+        });
+
+        console.log(`📅 ${recentPosts.length} posts are from the last ${maxAgeHours} hours`);
+
+        for (const post of recentPosts) {
           const processedThisHashtag = await this.processPost(post, hashtag);
           if (processedThisHashtag) {
             totalProcessed++;
@@ -272,13 +286,18 @@ export class BlueskyHashtagBot {
 
 // Simple export function for Netlify Functions
 export async function runBot(): Promise<void> {
+  const maxPostAgeHours = parseInt(process.env.MAX_POST_AGE_HOURS || '24', 10);
+  
   const config: BotConfig = {
     handle: process.env.BLUESKY_USERNAME || '',
     password: process.env.BLUESKY_PASSWORD || '',
     hashtags: ['#theblueskyshow'],
     responses: [], // Uses HASHTAG_RESPONSES from responses.ts
-    defaultCooldownMinutes: 30
+    defaultCooldownMinutes: 30,
+    maxPostAgeHours: maxPostAgeHours
   };
+
+  console.log(`🔧 Bot configured to process posts from the last ${maxPostAgeHours} hours`);
 
   const bot = new BlueskyHashtagBot(config);
   await bot.start();

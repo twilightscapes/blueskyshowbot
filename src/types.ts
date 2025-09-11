@@ -11,6 +11,7 @@ export interface BotConfig {
   hashtags: string[];
   responses: HashtagResponse[];
   defaultCooldownMinutes: number;
+  maxPostAgeHours?: number; // Only process posts from the last X hours (default: 24)
 }
 
 export interface LinkCardData {
