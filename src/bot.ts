@@ -203,10 +203,31 @@ export class BlueskyHashtagBot {
     // Add image if specified
     if (responseData.image) {
       try {
-        const imagePath = path.join(__dirname, '..', 'assets', 'images', responseData.image);
-        console.log(`🔍 Looking for image at: ${imagePath}`);
+        // Try multiple possible paths for different deployment environments
+        const possiblePaths = [
+          path.join(__dirname, '..', 'assets', 'images', responseData.image),
+          path.join(__dirname, '..', '..', 'assets', 'images', responseData.image),
+          path.join(process.cwd(), 'assets', 'images', responseData.image),
+          path.join(process.cwd(), 'dist', '..', 'assets', 'images', responseData.image)
+        ];
         
-        if (fs.existsSync(imagePath)) {
+        console.log(`🔍 Searching for image: ${responseData.image}`);
+        console.log(`📂 Current working directory: ${process.cwd()}`);
+        console.log(`📂 __dirname: ${__dirname}`);
+        
+        let imagePath: string | null = null;
+        for (const testPath of possiblePaths) {
+          console.log(`  Checking: ${testPath}`);
+          if (fs.existsSync(testPath)) {
+            imagePath = testPath;
+            console.log(`  ✅ Found at: ${testPath}`);
+            break;
+          } else {
+            console.log(`  ❌ Not found`);
+          }
+        }
+        
+        if (imagePath) {
           const imageBuffer = fs.readFileSync(imagePath);
           const imageBlob = new Uint8Array(imageBuffer);
           
@@ -217,7 +238,7 @@ export class BlueskyHashtagBot {
           else if (ext === '.gif') mimeType = 'image/gif';
           else if (ext === '.webp') mimeType = 'image/webp';
           
-          console.log(`📤 Uploading image: ${responseData.image} (${mimeType})`);
+          console.log(`📤 Uploading image: ${responseData.image} (${mimeType}) - ${imageBuffer.length} bytes`);
           
           const uploadResponse = await this.agent.uploadBlob(imageBlob, {
             encoding: mimeType
@@ -231,12 +252,24 @@ export class BlueskyHashtagBot {
                 alt: responseData.alt || 'BlueSky Show promotional image'
               }]
             };
-            console.log(`✅ Image uploaded successfully`);
+            console.log(`✅ Image uploaded successfully to Bluesky`);
           } else {
             console.error(`❌ Image upload failed:`, uploadResponse);
           }
         } else {
-          console.log(`⚠️ Image file not found: ${imagePath}`);
+          console.log(`⚠️ Image file not found in any of the expected locations`);
+          // List directory contents for debugging
+          try {
+            const baseDir = path.join(process.cwd(), 'assets', 'images');
+            if (fs.existsSync(baseDir)) {
+              const files = fs.readdirSync(baseDir);
+              console.log(`📁 Files in ${baseDir}:`, files);
+            } else {
+              console.log(`📁 Directory ${baseDir} does not exist`);
+            }
+          } catch (dirError) {
+            console.log(`📁 Could not list directory contents:`, dirError);
+          }
         }
       } catch (imageError) {
         console.error(`❌ Error processing image:`, imageError);
