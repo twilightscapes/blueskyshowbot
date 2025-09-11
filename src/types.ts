@@ -1,8 +1,16 @@
+export interface ResponseWithImage {
+  text: string;
+  image?: string; // Path to image file or base64 data
+  alt?: string;   // Alt text for the image
+}
+
 export interface HashtagResponse {
   hashtag: string;
-  responses: string[];
+  responses: ResponseWithImage[];
   cooldownMinutes?: number;
-  links?: string[]; // Optional links to create link cards
+  useRandomResponse?: boolean; // If false, always use first response
+  includeLink?: boolean;       // Whether to include the website link
+  websiteUrl?: string;         // The website URL to include
 }
 
 export interface BotConfig {

@@ -1,6 +1,8 @@
 import { BskyAgent } from '@atproto/api';
 import { BotConfig } from './types';
 import { getRandomResponse, getCooldownMinutes, HASHTAG_RESPONSES } from './responses';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class BlueskyHashtagBot {
   private agent: BskyAgent;
@@ -159,10 +161,14 @@ export class BlueskyHashtagBot {
   }
 
   private async replyToPost(originalPost: any, hashtag: string): Promise<void> {
-    const response = getRandomResponse(hashtag);
-    const config = HASHTAG_RESPONSES.find(r => r.hashtag.toLowerCase() === hashtag.toLowerCase());
+    const responseData = getRandomResponse(hashtag);
+    if (!responseData) {
+      console.error('❌ No response data found');
+      return;
+    }
     
-    console.log(`📤 Replying with: ${response}`);
+    console.log(`📤 Replying with: ${responseData.text}`);
+    console.log(`🖼️ Image: ${responseData.image || 'None'}`);
     console.log(`🎯 Reply target - URI: ${originalPost.uri}`);
     console.log(`🎯 Reply target - CID: ${originalPost.cid}`);
 
@@ -181,7 +187,7 @@ export class BlueskyHashtagBot {
     }
 
     const replyPost: any = {
-      text: response,
+      text: responseData.text,
       reply: {
         root: {
           uri: rootUri,
@@ -193,6 +199,50 @@ export class BlueskyHashtagBot {
         }
       }
     };
+
+    // Add image if specified
+    if (responseData.image) {
+      try {
+        const imagePath = path.join(__dirname, '..', 'assets', 'images', responseData.image);
+        console.log(`🔍 Looking for image at: ${imagePath}`);
+        
+        if (fs.existsSync(imagePath)) {
+          const imageBuffer = fs.readFileSync(imagePath);
+          const imageBlob = new Uint8Array(imageBuffer);
+          
+          // Determine image type from file extension
+          const ext = path.extname(responseData.image).toLowerCase();
+          let mimeType = 'image/jpeg'; // default
+          if (ext === '.png') mimeType = 'image/png';
+          else if (ext === '.gif') mimeType = 'image/gif';
+          else if (ext === '.webp') mimeType = 'image/webp';
+          
+          console.log(`📤 Uploading image: ${responseData.image} (${mimeType})`);
+          
+          const uploadResponse = await this.agent.uploadBlob(imageBlob, {
+            encoding: mimeType
+          });
+          
+          if (uploadResponse.success) {
+            replyPost.embed = {
+              $type: 'app.bsky.embed.images',
+              images: [{
+                image: uploadResponse.data.blob,
+                alt: responseData.alt || 'BlueSky Show promotional image'
+              }]
+            };
+            console.log(`✅ Image uploaded successfully`);
+          } else {
+            console.error(`❌ Image upload failed:`, uploadResponse);
+          }
+        } else {
+          console.log(`⚠️ Image file not found: ${imagePath}`);
+        }
+      } catch (imageError) {
+        console.error(`❌ Error processing image:`, imageError);
+        // Continue without image if it fails
+      }
+    }
 
     console.log(`📋 Reply structure:`, JSON.stringify({
       root: { uri: rootUri, cid: rootCid },

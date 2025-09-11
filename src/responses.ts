@@ -1,28 +1,77 @@
-import { HashtagResponse } from './types';
+import { HashtagResponse, ResponseWithImage } from './types';
 
 export const HASHTAG_RESPONSES: HashtagResponse[] = [
   {
     hashtag: '#theblueskyshow',
     responses: [
-      "🦋 Join us for the BlueSky Show - every Friday at 3:30 PM Central! Chat with your favorite blue skyers and discuss the day's events, politics, and more! 🌟\n\nhttps://blueskyshow.com",
-      "📺 Don't miss the BlueSky Show this Friday at 3:30 PM Central! Connect with fellow blue skyers and dive into today's hot topics and political discussions! 🗳️\n\nhttps://blueskyshow.com",
-      "🦋 The BlueSky Show is live every Friday at 3:30 PM Central! Come hang out, chat with amazing blue skyers, and talk about everything from daily news to politics! 💬\n\nhttps://blueskyshow.com",
-      "✨ Friday at 3:30 PM Central means BlueSky Show time! Join the conversation with your favorite blue skyers - we cover daily events, politics, and so much more! 🎯\n\nhttps://blueskyshow.com",
-      "🌟 Ready for the BlueSky Show? Every Friday 3:30 PM Central! Chat with fellow blue skyers about the day's events, political happenings, and everything in between! 🚀\n\nhttps://blueskyshow.com",
-      "🦋 BlueSky Show alert! Fridays at 3:30 PM Central - your weekly dose of great conversations with blue skyers about current events, politics, and more! 📡\n\nhttps://blueskyshow.com"
+      {
+        text: "🦋 Join us for the BlueSky Show - every Friday at 3:30 PM Central! Chat with your favorite blue skyers and discuss the day's events, politics, and more! 🌟",
+        image: "bluesky-show-1.jpg",
+        alt: "The BlueSky Show - Friday 3:30 PM Central"
+      },
+      {
+        text: "📺 Don't miss the BlueSky Show this Friday at 3:30 PM Central! Connect with fellow blue skyers and dive into today's hot topics and political discussions! 🗳️",
+        image: "bluesky-show-2.jpg", 
+        alt: "BlueSky Show - Weekly discussions"
+      },
+      {
+        text: "🦋 The BlueSky Show is live every Friday at 3:30 PM Central! Come hang out, chat with amazing blue skyers, and talk about everything from daily news to politics! 💬",
+        image: "bluesky-show-3.jpg",
+        alt: "Live BlueSky Show discussions"
+      },
+      {
+        text: "✨ Friday at 3:30 PM Central means BlueSky Show time! Join the conversation with your favorite blue skyers - we cover daily events, politics, and so much more! 🎯",
+        image: "bluesky-show-4.jpg",
+        alt: "BlueSky Show conversation time"
+      },
+      {
+        text: "🌟 Ready for the BlueSky Show? Every Friday 3:30 PM Central! Chat with fellow blue skyers about the day's events, political happenings, and everything in between! 🚀",
+        image: "bluesky-show-5.jpg",
+        alt: "Get ready for the BlueSky Show"
+      },
+      {
+        text: "🦋 BlueSky Show alert! Fridays at 3:30 PM Central - your weekly dose of great conversations with blue skyers about current events, politics, and more! 📡",
+        image: "bluesky-show-6.jpg",
+        alt: "BlueSky Show weekly alert"
+      }
     ],
-    cooldownMinutes: 30
+    cooldownMinutes: 30,
+    useRandomResponse: true,        // Set to false to always use first response
+    includeLink: true,              // Whether to add website link
+    websiteUrl: "https://blueskyshow.com"
   }
 ];
 
-export function getRandomResponse(hashtag: string): string {
+export function getRandomResponse(hashtag: string): ResponseWithImage | null {
   const config = HASHTAG_RESPONSES.find(r => r.hashtag.toLowerCase() === hashtag.toLowerCase());
   if (!config || config.responses.length === 0) {
-    return `Thanks for using ${hashtag}! Join us for the BlueSky Show every Friday at 3:30 PM Central!`;
+    return {
+      text: `Thanks for using ${hashtag}! Join us for the BlueSky Show every Friday at 3:30 PM Central!`,
+      alt: "Default BlueSky Show response"
+    };
   }
   
-  const randomIndex = Math.floor(Math.random() * config.responses.length);
-  return config.responses[randomIndex];
+  let selectedResponse: ResponseWithImage;
+  
+  if (config.useRandomResponse === false) {
+    // Always use first response
+    selectedResponse = config.responses[0];
+  } else {
+    // Use random response (default behavior)
+    const randomIndex = Math.floor(Math.random() * config.responses.length);
+    selectedResponse = config.responses[randomIndex];
+  }
+  
+  // Add website link if configured
+  let finalText = selectedResponse.text;
+  if (config.includeLink && config.websiteUrl) {
+    finalText += `\n\n${config.websiteUrl}`;
+  }
+  
+  return {
+    ...selectedResponse,
+    text: finalText
+  };
 }
 
 export function getCooldownMinutes(hashtag: string, defaultCooldown: number = 30): number {

@@ -5,8 +5,10 @@ A simple Bluesky bot that monitors the #theblueskyshow hashtag and responds with
 ## Features
 
 - 🎯 **Case-insensitive hashtag monitoring** - Responds to #theblueskyshow, #TheBlueSkyShow, #THEBLUESKYSHOW, etc.
-- 📺 **Show promotion** - Promotes the weekly BlueSky Show with details about timing and content
-- 🔗 **Link cards** - Automatically creates link cards for blueskyshow.com URLs
+- �️ **Custom promotional images** - Each response can include a unique image
+- 🔄 **Flexible response system** - Random responses or always use the same one
+- �📺 **Show promotion** - Promotes the weekly BlueSky Show with details about timing and content
+- 🔗 **Configurable links** - Include/exclude website links as needed
 - ⏱️ **Smart cooldowns** - Prevents spam with 30-minute cooldown periods
 - 🚫 **Duplicate prevention** - Won't reply to the same post multiple times
 - 📊 **Performance optimized** - Only processes posts from the last 24 hours
@@ -29,6 +31,17 @@ git clone <your-repo-url>
 cd bluesky-show-bot
 npm install
 ```
+
+### 2. Add Your Images (Optional)
+Place 6 promotional images in `assets/images/`:
+- `bluesky-show-1.jpg` through `bluesky-show-6.jpg`
+- See `IMAGE-SETUP.md` for detailed instructions
+
+### 3. Configure Responses
+Edit `src/responses.ts` to control:
+- `useRandomResponse: true/false` - Random vs fixed response
+- `includeLink: true/false` - Include website link
+- Response text and image assignments
 
 ### 2. Configure Environment
 Copy `.env.example` to `.env` and fill in your details:
