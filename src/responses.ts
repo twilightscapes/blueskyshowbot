@@ -4,19 +4,14 @@ export const HASHTAG_RESPONSES: HashtagResponse[] = [
   {
     hashtag: '#theblueskyshow',
     responses: [
-      "🦋 Join us for the BlueSky Show - every Friday at 3:30 PM Central! Chat with your favorite blue skyers and discuss the day's events, politics, and more! 🌟",
-      "📺 Don't miss the BlueSky Show this Friday at 3:30 PM Central! Connect with fellow blue skyers and dive into today's hot topics and political discussions! 🗳️",
-      "🦋 The BlueSky Show is live every Friday at 3:30 PM Central! Come hang out, chat with amazing blue skyers, and talk about everything from daily news to politics! 💬",
-      "✨ Friday at 3:30 PM Central means BlueSky Show time! Join the conversation with your favorite blue skyers - we cover daily events, politics, and so much more! 🎯",
-      "🌟 Ready for the BlueSky Show? Every Friday 3:30 PM Central! Chat with fellow blue skyers about the day's events, political happenings, and everything in between! 🚀",
-      "🦋 BlueSky Show alert! Fridays at 3:30 PM Central - your weekly dose of great conversations with blue skyers about current events, politics, and more! 📡"
+      "🦋 Join us for the BlueSky Show - every Friday at 3:30 PM Central! Chat with your favorite blue skyers and discuss the day's events, politics, and more! 🌟\n\nhttps://blueskyshow.com",
+      "📺 Don't miss the BlueSky Show this Friday at 3:30 PM Central! Connect with fellow blue skyers and dive into today's hot topics and political discussions! 🗳️\n\nhttps://blueskyshow.com",
+      "🦋 The BlueSky Show is live every Friday at 3:30 PM Central! Come hang out, chat with amazing blue skyers, and talk about everything from daily news to politics! 💬\n\nhttps://blueskyshow.com",
+      "✨ Friday at 3:30 PM Central means BlueSky Show time! Join the conversation with your favorite blue skyers - we cover daily events, politics, and so much more! 🎯\n\nhttps://blueskyshow.com",
+      "🌟 Ready for the BlueSky Show? Every Friday 3:30 PM Central! Chat with fellow blue skyers about the day's events, political happenings, and everything in between! 🚀\n\nhttps://blueskyshow.com",
+      "🦋 BlueSky Show alert! Fridays at 3:30 PM Central - your weekly dose of great conversations with blue skyers about current events, politics, and more! 📡\n\nhttps://blueskyshow.com"
     ],
-    cooldownMinutes: 30,
-    links: [
-      'https://blueskyshow.com',
-    //   'https://blueskyshow.com/watch',
-    //   'https://blueskyshow.com/schedule'
-    ]
+    cooldownMinutes: 30
   }
 ];
 
