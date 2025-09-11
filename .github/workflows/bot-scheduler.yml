@@ -2,10 +2,12 @@ name: Bluesky Show Bot Scheduler
 
 on:
   schedule:
-    # Try every 5 minutes instead - more reliable
-    - cron: '*/5 * * * *'
+    - cron: "*/1 * * * *"  # Every minute to test
   workflow_dispatch:
     # Allow manual triggering
+
+permissions:
+  contents: read
 
 jobs:
   run-bot:
@@ -16,12 +18,12 @@ jobs:
       run: echo "🚀 Starting scheduled bot run at $(date)"
       
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
         
     - name: Install dependencies
