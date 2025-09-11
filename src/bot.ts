@@ -269,3 +269,17 @@ export class BlueskyHashtagBot {
     return false;
   }
 }
+
+// Simple export function for Netlify Functions
+export async function runBot(): Promise<void> {
+  const config: BotConfig = {
+    handle: process.env.BLUESKY_USERNAME || '',
+    password: process.env.BLUESKY_PASSWORD || '',
+    hashtags: ['#theblueskyshow'],
+    responses: [], // Uses HASHTAG_RESPONSES from responses.ts
+    defaultCooldownMinutes: 30
+  };
+
+  const bot = new BlueskyHashtagBot(config);
+  await bot.start();
+}

@@ -1,45 +1,30 @@
 import { Handler } from '@netlify/functions';
+import { runBot } from '../../src/bot';
 
 const handler: Handler = async (event, context) => {
-  console.log('🚀 Netlify function started');
+  console.log('🚀 Netlify function triggered at:', new Date().toISOString());
   
-  try {
-    // Dynamic import to avoid bundling issues
-    const { BlueskyHashtagBot } = await import('../../dist/bot.js');
-    const { BotConfig } = await import('../../dist/types.js');
-    
-    // Get environment variables
-    const handle = process.env.BLUESKY_HANDLE;
-    const password = process.env.BLUESKY_PASSWORD;
-    const hashtagsEnv = process.env.HASHTAGS || '#blueskyshow';
-    
-    if (!handle || !password) {
-      throw new Error('BLUESKY_HANDLE and BLUESKY_PASSWORD environment variables are required');
-    }
-
-    const hashtags = hashtagsEnv.split(',').map((tag: string) => tag.trim());
-    
-    const config = {
-      handle,
-      password,
-      hashtags,
-      responses: [], // Responses are handled in responses.ts
-      defaultCooldownMinutes: parseInt(process.env.REPLY_INTERVAL_MINUTES || '30', 10)
+  // Check for required environment variables
+  if (!process.env.BLUESKY_USERNAME || !process.env.BLUESKY_PASSWORD) {
+    console.error('Missing required environment variables');
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ 
+        success: false, 
+        error: 'Missing required environment variables' 
+      })
     };
+  }
 
-    console.log(`👤 Handle: ${config.handle}`);
-    console.log(`🏷️  Monitoring hashtags: ${config.hashtags.join(', ')}`);
-    console.log(`⏱️  Default cooldown: ${config.defaultCooldownMinutes} minutes`);
-
-    const bot = new BlueskyHashtagBot(config);
-    await bot.start();
+  try {
+    console.log('Starting bot run...');
+    await runBot();
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
         message: 'Bot execution completed successfully',
-        hashtags: config.hashtags,
         timestamp: new Date().toISOString()
       })
     };

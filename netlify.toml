@@ -1,3 +1,9 @@
 [build]
   publish = "dist"
   command = "npm run build"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[functions]]
+  path = "netlify/functions/bot.ts"
