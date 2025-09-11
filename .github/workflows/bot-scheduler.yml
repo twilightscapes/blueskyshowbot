@@ -2,8 +2,8 @@ name: Bluesky Show Bot Scheduler
 
 on:
   schedule:
-    # Run every 2 minutes
-    - cron: '*/2 * * * *'
+    # Run every minute for testing
+    - cron: '* * * * *'
   workflow_dispatch:
     # Allow manual triggering
 

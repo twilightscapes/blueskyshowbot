@@ -128,12 +128,26 @@ export class BlueskyHashtagBot {
     console.log(`🎯 Reply target - URI: ${originalPost.uri}`);
     console.log(`🎯 Reply target - CID: ${originalPost.cid}`);
 
+    // Check if the original post is already a reply to determine the root
+    const originalRecord = originalPost.record;
+    let rootUri = originalPost.uri;
+    let rootCid = originalPost.cid;
+    
+    if (originalRecord?.reply?.root) {
+      // This post is already a reply, use its root
+      rootUri = originalRecord.reply.root.uri;
+      rootCid = originalRecord.reply.root.cid;
+      console.log(`📎 Post is a reply, using root: ${rootUri}`);
+    } else {
+      console.log(`📎 Post is original, using as root: ${rootUri}`);
+    }
+
     const replyPost: any = {
       text: response,
       reply: {
         root: {
-          uri: originalPost.uri,
-          cid: originalPost.cid
+          uri: rootUri,
+          cid: rootCid
         },
         parent: {
           uri: originalPost.uri,
@@ -141,6 +155,11 @@ export class BlueskyHashtagBot {
         }
       }
     };
+
+    console.log(`📋 Reply structure:`, JSON.stringify({
+      root: { uri: rootUri, cid: rootCid },
+      parent: { uri: originalPost.uri, cid: originalPost.cid }
+    }, null, 2));
 
     // Add link card if configured for this hashtag
     if (config?.links && config.links.length > 0) {
