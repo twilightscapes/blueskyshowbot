@@ -2,8 +2,8 @@ name: Bluesky Show Bot Scheduler
 
 on:
   schedule:
-    # Run every minute for testing
-    - cron: '* * * * *'
+    # Try every 5 minutes instead - more reliable
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     # Allow manual triggering
 
@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Log startup
+      run: echo "🚀 Starting scheduled bot run at $(date)"
+      
     - name: Checkout code
       uses: actions/checkout@v3
       
