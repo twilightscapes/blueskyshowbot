@@ -27,6 +27,12 @@ function createBotConfig(): BotConfig {
 
 async function main() {
   try {
+    // Check if bot is disabled
+    if (process.env.BOT_DISABLED === 'true') {
+      console.log('🛑 Bot is disabled via BOT_DISABLED environment variable');
+      return;
+    }
+
     const config = createBotConfig();
     const bot = new BlueskyHashtagBot(config);
     

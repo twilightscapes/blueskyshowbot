@@ -25,7 +25,12 @@ export class BlueskyHashtagBot {
         identifier: this.config.handle,
         password: this.config.password
       });
-      console.log('Successfully logged in to Bluesky');
+      console.log(`Successfully logged in to Bluesky as: ${this.config.handle}`);
+      
+      // Get our profile to confirm the handle
+      const profile = await this.agent.getProfile({ actor: this.config.handle });
+      console.log(`✅ Confirmed bot profile: @${profile.data.handle}`);
+      
     } catch (error) {
       console.error('Failed to login:', error);
       throw error;
@@ -82,10 +87,14 @@ export class BlueskyHashtagBot {
     const text = post.record?.text || '';
     const postUri = post.uri;
 
-    // Check if the hashtag is actually in the text (case insensitive)
-    if (!text.toLowerCase().includes(hashtag.toLowerCase())) {
+    // Check for exact hashtag match (not substring match)
+    const hashtagRegex = new RegExp(`\\${hashtag}(?=\\s|$|[^a-zA-Z0-9])`, 'i');
+    if (!hashtagRegex.test(text)) {
+      console.log(`⏭️ SKIPPING - hashtag "${hashtag}" not found as complete word in: "${text.substring(0, 100)}..."`);
       return false;
     }
+
+    console.log(`🎯 Found exact hashtag "${hashtag}" in post: "${text.substring(0, 100)}..."`);
 
     // Check if we've already replied to this post for this hashtag
     if (await this.hasRecentReply(postUri, hashtag)) {
@@ -191,11 +200,12 @@ export class BlueskyHashtagBot {
   private async hasRecentReply(postUri: string, hashtag: string): Promise<boolean> {
     try {
       console.log(`🔍 Checking if we've already replied to: ${postUri}`);
+      console.log(`🤖 Our bot handle: ${this.config.handle}`);
       
       // Get the post thread to see replies
       const threadResponse = await this.agent.app.bsky.feed.getPostThread({
         uri: postUri,
-        depth: 1
+        depth: 2  // Get deeper replies to be sure
       });
 
       if (!threadResponse.data.thread) {
@@ -209,20 +219,27 @@ export class BlueskyHashtagBot {
       console.log(`📊 Found ${replies.length} replies to check`);
       
       // Check if any reply is from our bot
-      for (const reply of replies) {
+      for (let i = 0; i < replies.length; i++) {
+        const reply = replies[i];
         const replyAuthor = reply.post?.author?.handle;
+        const replyText = reply.post?.record?.text || '';
+        
+        console.log(`  Reply ${i + 1}: @${replyAuthor} - "${replyText.substring(0, 50)}..."`);
+        
         if (replyAuthor === this.config.handle) {
-          console.log(`✅ Found existing reply from our bot (@${replyAuthor})`);
+          console.log(`✅ FOUND existing reply from our bot (@${replyAuthor})`);
+          console.log(`✅ Reply text: "${replyText.substring(0, 100)}..."`);
           return true;
         }
       }
       
-      console.log(`🆕 No previous replies from our bot found`);
+      console.log(`🆕 No previous replies from our bot (@${this.config.handle}) found`);
       return false;
     } catch (error) {
       console.error(`❌ Error checking for previous replies:`, error);
-      // On error, assume we haven't replied to avoid spam
-      return false;
+      // On error, assume we HAVE replied to avoid spam
+      console.log(`🛡️ Assuming we've already replied due to error (safety measure)`);
+      return true;
     }
   }
 
