@@ -1,6 +1,6 @@
-# Bluesky Show Bot
+# Blue- 🎙️ **Single hashtag focus** - Monitors #theblueskyshow for maximum engagementky Show Bot
 
-A simple Bluesky bot that monitors the #blueskyshow hashtag and responds with automated replies to promote the weekly BlueSky Show - every Friday at 3:30 PM Central!
+A simple Bluesky bot that monitors the #theblueskyshow hashtag and responds with automated replies to promote the weekly BlueSky Show - every Friday at 3:30 PM Central!
 
 ## Features
 
@@ -40,7 +40,7 @@ Edit `.env`:
 ```env
 BLUESKY_HANDLE=your-bot-handle.bsky.social
 BLUESKY_PASSWORD=your-app-password
-HASHTAGS=#blueskyshow
+HASHTAGS=#theblueskyshow
 REPLY_INTERVAL_MINUTES=30
 ```
 
@@ -64,7 +64,7 @@ Add these secrets to your GitHub repository:
 ## Configuration
 
 ### Hashtag
-The bot monitors a single hashtag: `#blueskyshow`
+The bot monitors a single hashtag: `#theblueskyshow`
 
 ### Responses
 The bot has 6 different response templates in `src/responses.ts`, each promoting the Friday 3:30 PM Central show:
@@ -85,13 +85,13 @@ The bot can automatically create link cards for:
 When a response is posted, the bot randomly selects one of these URLs and creates an attractive link card embed.
 
 ### Cooldowns
-- **30-minute cooldown** - Prevents responding too frequently to #blueskyshow
+- **30-minute cooldown** - Prevents responding too frequently to #theblueskyshow
 - **Per-post tracking** - Won't reply to the same post twice
 - **Memory cleanup** - Removes tracking data older than 24 hours
 
 ## How It Works
 
-1. **Search** - Bot searches for posts containing #blueskyshow
+1. **Search** - Bot searches for posts containing #theblueskyshow
 2. **Filter** - Checks cooldowns and duplicate prevention
 3. **Respond** - Selects a random response about the Friday show
 4. **Link Card** - Creates a link card for blueskyshow.com (random URL)
@@ -177,7 +177,7 @@ schedule:
 |----------|-------------|---------|
 | `BLUESKY_HANDLE` | Your bot's Bluesky handle | Required |
 | `BLUESKY_PASSWORD` | App password from Bluesky | Required |
-| `HASHTAGS` | Hashtag to monitor (single) | `#blueskyshow` |
+| `HASHTAGS` | Hashtag to monitor (single) | `#theblueskyshow` |
 | `REPLY_INTERVAL_MINUTES` | Cooldown between replies | `30` |
 
 ## Troubleshooting

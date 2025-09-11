@@ -2,7 +2,7 @@ import { HashtagResponse } from './types';
 
 export const HASHTAG_RESPONSES: HashtagResponse[] = [
   {
-    hashtag: '#blueskyshow',
+    hashtag: '#theblueskyshow',
     responses: [
       '�️ Join us for the BlueSky Show - every Friday at 3:30 PM Central! Chat with your favorite blue skyers and discuss the day\'s events, politics, and more! 🌟',
       '📺 Don\'t miss the BlueSky Show this Friday at 3:30 PM Central! Connect with fellow blue skyers and dive into today\'s hot topics and political discussions! 🗳️',

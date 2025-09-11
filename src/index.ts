@@ -8,7 +8,7 @@ dotenv.config();
 function createBotConfig(): BotConfig {
   const handle = process.env.BLUESKY_HANDLE;
   const password = process.env.BLUESKY_PASSWORD;
-  const hashtagsEnv = process.env.HASHTAGS || '#blueskyshow';
+  const hashtagsEnv = process.env.HASHTAGS || '#theblueskyshow';
   
   if (!handle || !password) {
     throw new Error('BLUESKY_HANDLE and BLUESKY_PASSWORD environment variables are required');
