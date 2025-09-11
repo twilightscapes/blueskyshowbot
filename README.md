@@ -1,17 +1,17 @@
-# Blue- 🎙️ **Single hashtag focus** - Monitors #theblueskyshow for maximum engagementky Show Bot
+# BlueSky Show Bot 🎙️
 
 A simple Bluesky bot that monitors the #theblueskyshow hashtag and responds with automated replies to promote the weekly BlueSky Show - every Friday at 3:30 PM Central!
 
 ## Features
 
-- �️ **Single hashtag focus** - Monitors #blueskyshow for maximum engagement
+- 🎯 **Case-insensitive hashtag monitoring** - Responds to #theblueskyshow, #TheBlueSkyShow, #THEBLUESKYSHOW, etc.
 - 📺 **Show promotion** - Promotes the weekly BlueSky Show with details about timing and content
 - 🔗 **Link cards** - Automatically creates link cards for blueskyshow.com URLs
 - ⏱️ **Smart cooldowns** - Prevents spam with 30-minute cooldown periods
 - 🚫 **Duplicate prevention** - Won't reply to the same post multiple times
-- 📊 **Simple logging** - Clear console output for monitoring
+- 📊 **Performance optimized** - Only processes posts from the last 24 hours
 - ☁️ **Serverless deployment** - Runs on Netlify Functions
-- 🔄 **GitHub Actions automation** - Automated scheduling every 2 minutes
+- 🔄 **Reliable scheduling** - External cron service for consistent execution
 
 ## About the Show
 

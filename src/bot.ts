@@ -55,23 +55,45 @@ export class BlueskyHashtagBot {
     for (const hashtag of this.config.hashtags) {
       console.log(`🔍 Searching for hashtag: ${hashtag}`);
       
-      try {
-        const searchResults = await this.agent.app.bsky.feed.searchPosts({
-          q: hashtag,
-          limit: 25
-        });
+      // Generate common case variations for the search
+      const hashtagVariations = this.generateHashtagVariations(hashtag);
+      console.log(`🔤 Searching variations: ${hashtagVariations.join(', ')}`);
+      
+      const allPosts: any[] = [];
+      
+      // Search for each variation
+      for (const variation of hashtagVariations) {
+        try {
+          const searchResults = await this.agent.app.bsky.feed.searchPosts({
+            q: variation,
+            limit: 25
+          });
 
-        if (!searchResults.data.posts || searchResults.data.posts.length === 0) {
-          console.log(`No posts found for ${hashtag}`);
-          continue;
+          if (searchResults.data.posts && searchResults.data.posts.length > 0) {
+            console.log(`Found ${searchResults.data.posts.length} posts for ${variation}`);
+            allPosts.push(...searchResults.data.posts);
+          }
+        } catch (error) {
+          console.error(`Error searching for ${variation}:`, error);
         }
+      }
 
-        console.log(`Found ${searchResults.data.posts.length} posts for ${hashtag}`);
+      // Remove duplicates based on post URI
+      const uniquePosts = allPosts.filter((post, index, self) => 
+        index === self.findIndex(p => p.uri === post.uri)
+      );
 
-        // Filter posts to only include those from the last X hours (configurable, default 24 hours)
-        const maxAgeHours = this.config.maxPostAgeHours || 24;
-        const cutoffTime = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000);
-        const recentPosts = searchResults.data.posts.filter(post => {
+      if (uniquePosts.length === 0) {
+        console.log(`No posts found for any variation of ${hashtag}`);
+        continue;
+      }
+
+      console.log(`Found ${uniquePosts.length} unique posts for ${hashtag} variations`);
+
+      // Filter posts to only include those from the last X hours (configurable, default 24 hours)
+      const maxAgeHours = this.config.maxPostAgeHours || 24;
+      const cutoffTime = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000);
+      const recentPosts = uniquePosts.filter(post => {
           const postDate = new Date(post.indexedAt);
           const isRecent = postDate > cutoffTime;
           if (!isRecent) {
@@ -89,6 +111,8 @@ export class BlueskyHashtagBot {
           }
         }
 
+      try {
+        // Error handling for individual hashtag searches is handled above
       } catch (error) {
         console.error(`Error searching for ${hashtag}:`, error);
       }
@@ -274,6 +298,35 @@ export class BlueskyHashtagBot {
       console.log(`🛡️ Assuming we've already replied due to error (safety measure)`);
       return true;
     }
+  }
+
+  private generateHashtagVariations(hashtag: string): string[] {
+    // Remove # if present to work with the base word
+    const baseWord = hashtag.startsWith('#') ? hashtag.slice(1) : hashtag;
+    const hashtagBase = '#' + baseWord;
+    
+    // Generate common case variations
+    const variations = [
+      hashtagBase.toLowerCase(),           // #theblueskyshow
+      hashtagBase.toUpperCase(),           // #THEBLUESKYSHOW
+      '#' + baseWord.charAt(0).toUpperCase() + baseWord.slice(1).toLowerCase(), // #Theblueskyshow
+      '#' + baseWord.split('').map((char, i) => 
+        i === 0 || baseWord[i-1] === '' ? char.toUpperCase() : char.toLowerCase()
+      ).join(''), // Handle camelCase variations
+    ];
+
+    // Add specific common variations for "theblueskyshow"
+    if (baseWord.toLowerCase() === 'theblueskyshow') {
+      variations.push(
+        '#TheBlueSkyShow',     // PascalCase
+        '#theBlueskyShow',     // camelCase
+        '#TheBlueSKYShow',     // Mixed case
+        '#TheBlueSkYShow',     // Alternative mixed
+      );
+    }
+
+    // Remove duplicates and return
+    return [...new Set(variations)];
   }
 
   private isInCooldown(hashtag: string): boolean {

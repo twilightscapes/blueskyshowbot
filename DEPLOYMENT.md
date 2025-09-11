@@ -44,15 +44,18 @@ We'll use [cron-job.org](https://cron-job.org) - it's free and reliable.
    - Click "Create cronjob"
    - **Title**: "BlueSky Show Bot"
    - **URL**: Your Netlify function URL (from Step 1)
-   - **Schedule**: Every 2 minutes
-     - Minutes: `*/2`
-     - Hours: `*`
-     - Days: `*`
-     - Months: `*`
-     - Weekdays: `*`
+   - **Schedule Options** (choose one):
+     - **Most Responsive** (1-2 minutes): `*/1 * * * *` (1 min) or `*/2 * * * *` (2 min)
+     - **Recommended** (3-5 minutes): `*/3 * * * *` (3 min) or `*/5 * * * *` (5 min)
+     - **Efficient** (10 minutes): `*/10 * * * *` (10 min)
    - **HTTP Method**: GET
    - **Enabled**: Yes
    - Click "Create cronjob"
+
+### 📊 Timing Recommendations
+- **1-2 minutes**: Near real-time, uses ~14-28 credits/month
+- **3-5 minutes**: Great balance, uses ~6-10 credits/month  
+- **10+ minutes**: Very efficient, uses ~3 credits/month
 
 ## Step 3: Test the Setup
 
