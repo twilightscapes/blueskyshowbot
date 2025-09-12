@@ -62,11 +62,9 @@ export function getRandomResponse(hashtag: string): ResponseWithImage | null {
     selectedResponse = config.responses[randomIndex];
   }
   
-  // Add website link if configured
+  // Add website link if configured and NOT using embed (since embed will include the link)
   let finalText = selectedResponse.text;
-  if (config.includeLink && config.websiteUrl) {
-    finalText += `\n\n${config.websiteUrl}`;
-  }
+  // Don't add URL to text when using images since it will be in the link card embed
   
   return {
     ...selectedResponse,

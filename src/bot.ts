@@ -245,14 +245,30 @@ export class BlueskyHashtagBot {
           });
           
           if (uploadResponse.success) {
-            replyPost.embed = {
-              $type: 'app.bsky.embed.images',
-              images: [{
-                image: uploadResponse.data.blob,
-                alt: responseData.alt || 'BlueSky Show promotional image'
-              }]
-            };
-            console.log(`✅ Image uploaded successfully to Bluesky`);
+            // Create a link card embed with the custom image
+            const config = HASHTAG_RESPONSES.find(r => r.hashtag.toLowerCase() === hashtag.toLowerCase());
+            if (config?.includeLink && config.websiteUrl) {
+              replyPost.embed = {
+                $type: 'app.bsky.embed.external',
+                external: {
+                  uri: config.websiteUrl,
+                  title: 'The BlueSky Show',
+                  description: 'Join us for live discussions every Friday at 3:30 PM Central!',
+                  thumb: uploadResponse.data.blob
+                }
+              };
+              console.log(`✅ Link card with custom image created`);
+            } else {
+              // If no link configured, just show the image
+              replyPost.embed = {
+                $type: 'app.bsky.embed.images',
+                images: [{
+                  image: uploadResponse.data.blob,
+                  alt: responseData.alt || 'BlueSky Show promotional image'
+                }]
+              };
+              console.log(`✅ Image-only embed created`);
+            }
           } else {
             console.error(`❌ Image upload failed:`, uploadResponse);
           }
