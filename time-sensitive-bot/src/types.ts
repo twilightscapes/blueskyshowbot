@@ -7,7 +7,6 @@ export interface ResponseWithImage {
 export interface HashtagResponse {
   hashtag: string;
   responses: ResponseWithImage[];
-  timeSensitiveResponses?: ResponseWithImage[]; // Optional array for time-sensitive responses
   cooldownMinutes?: number;
   useRandomResponse?: boolean; // If false, always use first response
   includeLink?: boolean;       // Whether to include the website link
