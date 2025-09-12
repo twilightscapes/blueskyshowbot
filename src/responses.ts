@@ -98,31 +98,31 @@ export const HASHTAG_RESPONSES: HashtagResponse[] = [
       {
         // 0: More than 1 day out (Monday - Wednesday)
         text: "🦋 Join us for the BlueSky Show - every Friday at 3:30 PM Central! Chat with your favorite blue skyers and discuss the day's events, politics, and more! 🌟",
-        image: "bluesky-show-1.webp",
-        alt: "The BlueSky Show - Friday 3:30 PM Central"
+        image: "blueskyshow-week.webp",
+        alt: "The BlueSky Show - This Week Friday 3:30 PM Central"
       },
       {
         // 1: Day before (Thursday)
         text: "📺 Tomorrow is BlueSky Show day! Don't miss it - Friday at 3:30 PM Central! Connect with fellow blue skyers and dive into today's hot topics and political discussions! 🗳️",
-        image: "bluesky-show2.webp", 
-        alt: "BlueSky Show tomorrow - Friday 3:30 PM Central"
+        image: "blueskyshow-tomorrow.webp", 
+        alt: "BlueSky Show Tomorrow - Friday 3:30 PM Central"
       },
       {
         // 2: Day of event - before show (Friday before 3:15 PM)
         text: "🎉 TODAY is BlueSky Show day! Join us at 3:30 PM Central! Come hang out, chat with amazing blue skyers, and talk about everything from daily news to politics! 💬✨",
-        image: "bluesky-show3.webp",
+        image: "blueskyshow-today.webp",
         alt: "BlueSky Show TODAY at 3:30 PM Central"
       },
       {
         // 3: Show is live (Friday 3:15 PM - 6:00 PM)
         text: "🔴 LIVE NOW! The BlueSky Show is happening RIGHT NOW! Join us live at the link below for amazing conversations with blue skyers about today's hottest topics! 🎙️🔥",
-        image: "bluesky-show-1.webp",
+        image: "blueskyshow-live.webp",
         alt: "BlueSky Show LIVE NOW"
       },
       {
         // 4: Show replay period (Friday after 6:30 PM through Sunday)
         text: "🎬 Missed the BlueSky Show? No worries! Catch the replay and join the ongoing conversation with fellow blue skyers about this week's discussions! 📺💬",
-        image: "bluesky-show2.webp",
+        image: "blueskyshow-replays.webp",
         alt: "BlueSky Show replay available"
       }
     ],
