@@ -2,10 +2,10 @@ import { HashtagResponse, ResponseWithImage } from './types';
 
 // 🎛️ ================== MODE SWITCH ==================
 // Set USE_TIME_SENSITIVE_MODE to:
-//   • true  = Time-sensitive responses (3 responses based on day/time)
+//   • true  = Time-sensitive responses (5 responses based on day/time)
 //   • false = Random responses (6 different responses chosen randomly)
 // ====================================================
-export const USE_TIME_SENSITIVE_MODE = false;
+export const USE_TIME_SENSITIVE_MODE = true;
 
 // Helper function to get the appropriate response based on current time
 function getTimeBasedResponse(hashtag: string): ResponseWithImage | null {
@@ -26,37 +26,34 @@ function getTimeBasedResponse(hashtag: string): ResponseWithImage | null {
   // This is a simple approach assuming the server runs in a reasonable timezone
   const centralHour = currentHour; // Adjust this based on your server's timezone if needed
   
-  // Calculate time until next Friday 3:30 PM Central
-  let daysUntilFriday: number;
-  if (currentDay === 5) { // Friday
-    if (centralHour < 15 || (centralHour === 15 && currentMinutes < 30)) {
-      // It's Friday but before 3:30 PM - day of event
-      return config.timeSensitiveResponses?.[2] || config.responses[2]; // Day of event response
-    } else {
-      // It's Friday after 3:30 PM - more than 1 day out (next Friday)
-      daysUntilFriday = 7;
-    }
-  } else if (currentDay === 6) { // Saturday
-    daysUntilFriday = 6;
-  } else if (currentDay === 0) { // Sunday
-    daysUntilFriday = 5;
-  } else if (currentDay === 1) { // Monday
-    daysUntilFriday = 4;
-  } else if (currentDay === 2) { // Tuesday
-    daysUntilFriday = 3;
-  } else if (currentDay === 3) { // Wednesday
-    daysUntilFriday = 2;
-  } else { // Thursday
-    daysUntilFriday = 1;
-  }
+  // Time periods:
+  // 0: More than 1 day out (Monday-Wednesday)
+  // 1: Day before (Thursday)  
+  // 2: Day of event - before show (Friday before 3:15 PM)
+  // 3: Show is live (Friday 3:15 PM - 6:00 PM)
+  // 4: Show replay period (Friday after 6:30 PM through Sunday)
 
-  if (daysUntilFriday === 1) {
-    // Day before (Thursday)
+  if (currentDay === 5) { // Friday
+    if (centralHour < 15 || (centralHour === 15 && currentMinutes < 15)) {
+      // Friday before 3:15 PM - day of event
+      return config.timeSensitiveResponses?.[2] || config.responses[2];
+    } else if (centralHour < 18 || (centralHour === 18 && currentMinutes === 0)) {
+      // Friday 3:15 PM - 6:00 PM - show is live
+      return config.timeSensitiveResponses?.[3] || config.responses[3];
+    } else if (centralHour >= 18 && currentMinutes >= 30) {
+      // Friday after 6:30 PM - show replay period
+      return config.timeSensitiveResponses?.[4] || config.responses[4];
+    } else {
+      // Friday 6:00-6:30 PM - transition period, use live show response
+      return config.timeSensitiveResponses?.[3] || config.responses[3];
+    }
+  } else if (currentDay === 6 || currentDay === 0) { // Saturday or Sunday
+    // Weekend - show replay period
+    return config.timeSensitiveResponses?.[4] || config.responses[4];
+  } else if (currentDay === 4) { // Thursday
+    // Day before
     return config.timeSensitiveResponses?.[1] || config.responses[1];
-  } else if (daysUntilFriday === 0) {
-    // Day of event (Friday before 3 PM)
-    return config.timeSensitiveResponses?.[2] || config.responses[2];
-  } else {
+  } else { // Monday (1), Tuesday (2), Wednesday (3)
     // More than 1 day out
     return config.timeSensitiveResponses?.[0] || config.responses[0];
   }
@@ -99,22 +96,34 @@ export const HASHTAG_RESPONSES: HashtagResponse[] = [
     ],
     timeSensitiveResponses: [
       {
-        // More than 1 day out (Saturday - Wednesday)
+        // 0: More than 1 day out (Monday - Wednesday)
         text: "🦋 Join us for the BlueSky Show - every Friday at 3:30 PM Central! Chat with your favorite blue skyers and discuss the day's events, politics, and more! 🌟",
         image: "bluesky-show-1.webp",
         alt: "The BlueSky Show - Friday 3:30 PM Central"
       },
       {
-        // Day before (Thursday)
+        // 1: Day before (Thursday)
         text: "📺 Tomorrow is BlueSky Show day! Don't miss it - Friday at 3:30 PM Central! Connect with fellow blue skyers and dive into today's hot topics and political discussions! 🗳️",
         image: "bluesky-show2.webp", 
         alt: "BlueSky Show tomorrow - Friday 3:30 PM Central"
       },
       {
-        // Day of event (Friday before 3:30 PM)
+        // 2: Day of event - before show (Friday before 3:15 PM)
         text: "🎉 TODAY is BlueSky Show day! Join us at 3:30 PM Central! Come hang out, chat with amazing blue skyers, and talk about everything from daily news to politics! 💬✨",
         image: "bluesky-show3.webp",
         alt: "BlueSky Show TODAY at 3:30 PM Central"
+      },
+      {
+        // 3: Show is live (Friday 3:15 PM - 6:00 PM)
+        text: "🔴 LIVE NOW! The BlueSky Show is happening RIGHT NOW! Join us live at the link below for amazing conversations with blue skyers about today's hottest topics! 🎙️🔥",
+        image: "bluesky-show-1.webp",
+        alt: "BlueSky Show LIVE NOW"
+      },
+      {
+        // 4: Show replay period (Friday after 6:30 PM through Sunday)
+        text: "🎬 Missed the BlueSky Show? No worries! Catch the replay and join the ongoing conversation with fellow blue skyers about this week's discussions! 📺💬",
+        image: "bluesky-show2.webp",
+        alt: "BlueSky Show replay available"
       }
     ],
     cooldownMinutes: 30,
