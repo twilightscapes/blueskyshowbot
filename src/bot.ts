@@ -1,8 +1,7 @@
 import { BskyAgent } from '@atproto/api';
 import { BotConfig } from './types';
 import { getRandomResponse, getCooldownMinutes, HASHTAG_RESPONSES } from './responses';
-import * as fs from 'fs';
-import * as path from 'path';
+import { getImageBuffer } from './images';
 
 export class BlueskyHashtagBot {
   private agent: BskyAgent;
@@ -203,44 +202,20 @@ export class BlueskyHashtagBot {
     // Add image if specified
     if (responseData.image) {
       try {
-        // Try multiple possible paths for different deployment environments
-        const possiblePaths = [
-          path.join(__dirname, '..', 'assets', 'images', responseData.image),
-          path.join(__dirname, '..', '..', 'assets', 'images', responseData.image),
-          path.join(process.cwd(), 'assets', 'images', responseData.image),
-          path.join(process.cwd(), 'dist', '..', 'assets', 'images', responseData.image)
-        ];
+        console.log(`�️ Loading image: ${responseData.image}`);
         
-        console.log(`🔍 Searching for image: ${responseData.image}`);
-        console.log(`📂 Current working directory: ${process.cwd()}`);
-        console.log(`📂 __dirname: ${__dirname}`);
-        
-        let imagePath: string | null = null;
-        for (const testPath of possiblePaths) {
-          console.log(`  Checking: ${testPath}`);
-          if (fs.existsSync(testPath)) {
-            imagePath = testPath;
-            console.log(`  ✅ Found at: ${testPath}`);
-            break;
-          } else {
-            console.log(`  ❌ Not found`);
-          }
-        }
-        
-        if (imagePath) {
-          const imageBuffer = fs.readFileSync(imagePath);
-          const imageBlob = new Uint8Array(imageBuffer);
-          
+        const imageBuffer = getImageBuffer(responseData.image);
+        if (imageBuffer) {
           // Determine image type from file extension
-          const ext = path.extname(responseData.image).toLowerCase();
+          const ext = responseData.image.split('.').pop()?.toLowerCase();
           let mimeType = 'image/jpeg'; // default
-          if (ext === '.png') mimeType = 'image/png';
-          else if (ext === '.gif') mimeType = 'image/gif';
-          else if (ext === '.webp') mimeType = 'image/webp';
+          if (ext === 'png') mimeType = 'image/png';
+          else if (ext === 'gif') mimeType = 'image/gif';
+          else if (ext === 'webp') mimeType = 'image/webp';
           
           console.log(`📤 Uploading image: ${responseData.image} (${mimeType}) - ${imageBuffer.length} bytes`);
           
-          const uploadResponse = await this.agent.uploadBlob(imageBlob, {
+          const uploadResponse = await this.agent.uploadBlob(imageBuffer, {
             encoding: mimeType
           });
           
@@ -265,19 +240,7 @@ export class BlueskyHashtagBot {
             console.error(`❌ Image upload failed:`, uploadResponse);
           }
         } else {
-          console.log(`⚠️ Image file not found in any of the expected locations`);
-          // List directory contents for debugging
-          try {
-            const baseDir = path.join(process.cwd(), 'assets', 'images');
-            if (fs.existsSync(baseDir)) {
-              const files = fs.readdirSync(baseDir);
-              console.log(`📁 Files in ${baseDir}:`, files);
-            } else {
-              console.log(`📁 Directory ${baseDir} does not exist`);
-            }
-          } catch (dirError) {
-            console.log(`📁 Could not list directory contents:`, dirError);
-          }
+          console.log(`⚠️ Image not found in embedded images: ${responseData.image}`);
         }
       } catch (imageError) {
         console.error(`❌ Error processing image:`, imageError);

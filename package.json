@@ -4,7 +4,7 @@
   "description": "A Bluesky bot that monitors hashtags and responds with automated replies for blueskyshow.com",
   "main": "dist/bot.js",
   "scripts": {
-    "build": "tsc && cp -r assets dist/ 2>/dev/null || true",
+    "build": "tsc && cp -r assets dist/ 2>/dev/null || true && cp -r assets netlify/functions/ 2>/dev/null || true",
     "dev": "tsx src/bot.ts",
     "start": "node dist/bot.js",
     "dev:netlify": "netlify dev",
