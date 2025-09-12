@@ -134,6 +134,42 @@ npm run build        # Compile TypeScript
 npm run dev:netlify  # Test Netlify function locally
 ```
 
+### Image Management
+
+The bot uses base64-encoded images embedded in the code for serverless deployment. When you need to update images:
+
+#### Adding or Replacing Images
+
+1. **Place your image file** in the `assets/images/` directory:
+   ```bash
+   # Example: Replace the "today" promotional image
+   cp your-new-image.webp assets/images/blueskyshow-today.webp
+   ```
+
+2. **Re-encode the images**:
+   ```bash
+   node scripts/encode-images.js
+   ```
+
+3. **Build and deploy**:
+   ```bash
+   npm run build
+   netlify deploy --prod
+   ```
+
+#### Currently Configured Images
+
+- `bluesky-show-1.webp` - Random promotional image 1
+- `bluesky-show2.webp` - Random promotional image 2  
+- `bluesky-show3.webp` - Random promotional image 3
+- `blueskyshow-week.webp` - Time-sensitive: Week ahead
+- `blueskyshow-tomorrow.webp` - Time-sensitive: Tomorrow
+- `blueskyshow-today.webp` - Time-sensitive: Today
+- `blueskyshow-live.webp` - Time-sensitive: Live now
+- `blueskyshow-replays.webp` - Time-sensitive: Replays
+
+**Important:** Any time you swap out an image file, you must run the encoding script to regenerate the base64 data in `src/images.ts`!
+
 ### File Structure
 ```
 src/
