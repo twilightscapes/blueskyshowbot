@@ -12,7 +12,16 @@ export const handler: Handler = async (event, context) => {
   console.log('Environment check:', { hasUsername, hasPassword });
   
   // Check for image files
-  const imageFiles = ['bluesky-show-1.webp', 'bluesky-show2.webp', 'bluesky-show3.webp'];
+  const imageFiles = [
+    'bluesky-show-1.webp', 
+    'bluesky-show2.webp', 
+    'bluesky-show3.webp',
+    'blueskyshow-week.webp',
+    'blueskyshow-tomorrow.webp', 
+    'blueskyshow-today.webp',
+    'blueskyshow-live.webp',
+    'blueskyshow-replays.webp'
+  ];
   const imagePaths = [];
   const foundImages = [];
   

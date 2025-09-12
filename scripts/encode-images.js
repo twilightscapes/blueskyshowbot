@@ -7,7 +7,12 @@ const outputFile = path.join(__dirname, '..', 'src', 'images.ts');
 const imageFiles = [
   'bluesky-show-1.webp',
   'bluesky-show2.webp', 
-  'bluesky-show3.webp'
+  'bluesky-show3.webp',
+  'blueskyshow-week.webp',
+  'blueskyshow-tomorrow.webp', 
+  'blueskyshow-today.webp',
+  'blueskyshow-live.webp',
+  'blueskyshow-replays.webp'
 ];
 
 let output = '// Auto-generated file - do not edit manually\n';
