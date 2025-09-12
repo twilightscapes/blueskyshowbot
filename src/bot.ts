@@ -220,21 +220,30 @@ export class BlueskyHashtagBot {
           });
           
           if (uploadResponse.success) {
-            // For now, let's just post the image to see if it works
-            replyPost.embed = {
-              $type: 'app.bsky.embed.images',
-              images: [{
-                image: uploadResponse.data.blob,
-                alt: responseData.alt || 'BlueSky Show promotional image'
-              }]
-            };
-            console.log(`✅ Image embed created`);
-            
-            // Also add the website URL to the text so it creates a link card
+            // Check if we should include a link card
             const config = HASHTAG_RESPONSES.find(r => r.hashtag.toLowerCase() === hashtag.toLowerCase());
             if (config?.includeLink && config.websiteUrl) {
-              replyPost.text += `\n\n${config.websiteUrl}`;
-              console.log(`✅ Website URL added to text for link card`);
+              // Create a link card with our custom image as thumbnail
+              replyPost.embed = {
+                $type: 'app.bsky.embed.external',
+                external: {
+                  uri: config.websiteUrl,
+                  title: 'The BlueSky Show',
+                  description: 'Join us for live discussions every Friday at 3:30 PM Central!',
+                  thumb: uploadResponse.data.blob
+                }
+              };
+              console.log(`✅ Link card with custom thumbnail created`);
+            } else {
+              // If no link configured, just show the image
+              replyPost.embed = {
+                $type: 'app.bsky.embed.images',
+                images: [{
+                  image: uploadResponse.data.blob,
+                  alt: responseData.alt || 'BlueSky Show promotional image'
+                }]
+              };
+              console.log(`✅ Image-only embed created`);
             }
           } else {
             console.error(`❌ Image upload failed:`, uploadResponse);
