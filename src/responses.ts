@@ -38,7 +38,7 @@ export const HASHTAG_RESPONSES: HashtagResponse[] = [
     cooldownMinutes: 30,
     useRandomResponse: true,        // Set to false to always use first response
     includeLink: true,              // Whether to add website link
-    websiteUrl: "https://blueskyshow.com"
+    websiteUrl: "https://www.clubhouse.com/house/bluesky-show?chs=RXrTq17X7E%3Aw3ez74oiMoA-UJbfZCkNWIId2XxnMboDLLPn3cOYPnc&utm_medium=ch_house_settings"
   }
 ];
 
